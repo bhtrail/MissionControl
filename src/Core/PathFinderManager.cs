@@ -43,18 +43,14 @@ namespace MissionControl {
       string spawnerId = Guid.NewGuid().ToString();
       string uniqueId = $"{spawnerId}.9999999999";
 
-      Main.LogDebug($"[CFPM] combatState = {combatState}");
       HeraldryDef heraldryDef = null;
       combatState.DataManager.Heraldries.TryGet(HeraldryDef.HeraldyrDef_SinglePlayerSkirmishPlayer1, out heraldryDef);
-      Main.LogDebug($"[CPFM] heraldyDef = {heraldryDef}");
-
+      
       MechDef mechDef = null;
       combatState.DataManager.MechDefs.TryGet("mechdef_spider_SDR-5V", out mechDef);
-      Main.LogDebug($"[CPFM] mechDef = {mechDef}");
-
+      
       PilotDef pilotDef = combatState.DataManager.GetObjectOfType<PilotDef>("pilot_default", BattleTechResourceType.PilotDef);
       
-      Main.LogDebug($"[CPFM] pilotDef = {pilotDef}, pilotsCount = {combatState.DataManager.PilotDefs.Count}");
       Mech mech = new Mech(mechDef, pilotDef, new TagSet(), uniqueId, combatState, spawnerId, heraldryDef);
       return mech;
     }
@@ -65,18 +61,15 @@ namespace MissionControl {
       string spawnerId = Guid.NewGuid().ToString();
       string uniqueId = $"{spawnerId}.9999999998";
 
-      Main.LogDebug($"[CFPV] combatState = {combatState}");
       HeraldryDef heraldryDef = null;
       combatState.DataManager.Heraldries.TryGet(HeraldryDef.HeraldyrDef_SinglePlayerSkirmishPlayer1, out heraldryDef);
-      Main.LogDebug($"[CPFV] heraldyDef = {heraldryDef}");
 
       VehicleDef vehicleDef = null;
       combatState.DataManager.VehicleDefs.TryGet("vehicledef_DEMOLISHER", out vehicleDef);
-      Main.LogDebug($"[CPFV] vehicleDef = {vehicleDef}");
 
       PilotDef pilotDef = null;
       combatState.DataManager.PilotDefs.TryGet("pilot_default", out pilotDef);
-      Main.LogDebug($"[CPFV] pilotDef = {pilotDef}");
+
       Vehicle vehicle = new Vehicle(vehicleDef, pilotDef, new TagSet(), uniqueId, combatState, spawnerId, heraldryDef);
 
       return vehicle;
