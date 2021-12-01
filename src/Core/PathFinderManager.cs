@@ -9,6 +9,7 @@ using Harmony;
 using HBS.Collections;
 
 using MissionControl.Utils;
+using BattleTech.Data;
 
 namespace MissionControl {
   public class PathFinderManager {
@@ -42,14 +43,18 @@ namespace MissionControl {
       string spawnerId = Guid.NewGuid().ToString();
       string uniqueId = $"{spawnerId}.9999999999";
 
+      Main.LogDebug($"[CFPM] combatState = {combatState}");
       HeraldryDef heraldryDef = null;
       combatState.DataManager.Heraldries.TryGet(HeraldryDef.HeraldyrDef_SinglePlayerSkirmishPlayer1, out heraldryDef);
+      Main.LogDebug($"[CPFM] heraldyDef = {heraldryDef}");
 
       MechDef mechDef = null;
       combatState.DataManager.MechDefs.TryGet("mechdef_spider_SDR-5V", out mechDef);
+      Main.LogDebug($"[CPFM] mechDef = {mechDef}");
 
-      PilotDef pilotDef = null;
-      combatState.DataManager.PilotDefs.TryGet("pilot_default", out pilotDef);
+      PilotDef pilotDef = combatState.DataManager.GetObjectOfType<PilotDef>("pilot_default", BattleTechResourceType.PilotDef);
+      
+      Main.LogDebug($"[CPFM] pilotDef = {pilotDef}, pilotsCount = {combatState.DataManager.PilotDefs.Count}");
       Mech mech = new Mech(mechDef, pilotDef, new TagSet(), uniqueId, combatState, spawnerId, heraldryDef);
       return mech;
     }
@@ -60,14 +65,18 @@ namespace MissionControl {
       string spawnerId = Guid.NewGuid().ToString();
       string uniqueId = $"{spawnerId}.9999999998";
 
+      Main.LogDebug($"[CFPV] combatState = {combatState}");
       HeraldryDef heraldryDef = null;
       combatState.DataManager.Heraldries.TryGet(HeraldryDef.HeraldyrDef_SinglePlayerSkirmishPlayer1, out heraldryDef);
+      Main.LogDebug($"[CPFV] heraldyDef = {heraldryDef}");
 
       VehicleDef vehicleDef = null;
       combatState.DataManager.VehicleDefs.TryGet("vehicledef_DEMOLISHER", out vehicleDef);
+      Main.LogDebug($"[CPFV] vehicleDef = {vehicleDef}");
 
       PilotDef pilotDef = null;
       combatState.DataManager.PilotDefs.TryGet("pilot_default", out pilotDef);
+      Main.LogDebug($"[CPFV] pilotDef = {pilotDef}");
       Vehicle vehicle = new Vehicle(vehicleDef, pilotDef, new TagSet(), uniqueId, combatState, spawnerId, heraldryDef);
 
       return vehicle;
@@ -76,13 +85,50 @@ namespace MissionControl {
     public void RequestPathFinderMech() {
       Main.LogDebug("[PFM] Requesting path finder mech");
       if (pathFinderMech == null) Init();
-      DataManager.Instance.RequestResourcesAndProcess(BattleTechResourceType.Prefab, pathFinderMech.MechDef.Chassis.PrefabIdentifier);
+
+      void LoadMechDefDependencies()
+      {
+        Main.LogDebug("[PFM] Request dependencies for MechDef");
+        MechDef mechDef = pathFinderMech.MechDef;
+        if (mechDef == null) return;
+        if (!mechDef.DependenciesLoaded(1000u))
+        {
+          DataManager.Instance.RequestDependencies(mechDef, delegate () { Main.LogDebug("[RPFM] Dependencies for MechDef Loaded"); });
+        }
+      }
+
+      if (!pathFinderMech.GetPilot().pilotDef.DependenciesLoaded(1000u))
+      {
+        Main.LogDebug("[PFM] Load Dependencies for PilotDef");
+        DataManager.Instance.RequestDependencies(pathFinderMech.GetPilot().pilotDef, LoadMechDefDependencies);
+        return;
+      }
+
+      LoadMechDefDependencies();
     }
 
     public void RequestPathFinderVehicle() {
       Main.LogDebug("[PFM] Requesting path finder vehicle");
       if (pathFinderVehicle == null) Init();
-      DataManager.Instance.RequestResourcesAndProcess(BattleTechResourceType.Prefab, pathFinderVehicle.VehicleDef.Chassis.PrefabIdentifier);
+
+      void LoadVehicleDefDependencies()
+      {
+        Main.LogDebug("[PFM] Request dependencies for VehicleDef");
+        VehicleDef vehicleDef = pathFinderVehicle.VehicleDef;
+        if (vehicleDef == null) return;
+        if (!vehicleDef.DependenciesLoaded(1000u))
+        {
+          DataManager.Instance.RequestDependencies(vehicleDef, delegate () { Main.LogDebug("[RPM] Dependencies for VehicleDef loaded"); });
+        }
+      }
+
+      PilotDef pilotDef = pathFinderVehicle.GetPilot().pilotDef;
+      if (!pilotDef.DependenciesLoaded(1000u))
+      {
+        DataManager.Instance.RequestDependencies(pilotDef, LoadVehicleDefDependencies);
+      }
+
+      LoadVehicleDefDependencies();
     }
 
     private AbstractActor GetPathFindingActor(UnitType type) {

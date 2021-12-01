@@ -464,7 +464,18 @@ namespace MissionControl {
         Main.LogDebug($"[RequestResourcesAndProcess] Finished load request for {resourceId}");
       }, filterByOwnership);
       loadRequest.AddBlindLoadRequest(resourceType, resourceId);
-      loadRequest.ProcessRequests(1000u);
+      loadRequest.ProcessRequests(10u);
+    }
+
+    public void RequestDependencies(BattleTech.Data.DataManager.ILoadDependencies loadDependencies, Action onComplete)
+    {
+      if (loadDependencies == null) return;
+      BattleTech.Data.DataManager dataManager = UnityGameInstance.BattleTechGame.DataManager;
+      BattleTech.Data.DataManager.InjectedDependencyLoadRequest loadRequest =
+        new BattleTech.Data.DataManager.InjectedDependencyLoadRequest(dataManager);
+      loadDependencies.GatherDependencies(dataManager, loadRequest, 1000u);
+      loadRequest.RegisterLoadCompleteCallback(onComplete);
+      dataManager.InjectDependencyLoader(loadRequest, 1000u);
     }
 
     public DateTime? GetSimGameCurrentDate() {
