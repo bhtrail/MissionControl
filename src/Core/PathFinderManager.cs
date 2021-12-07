@@ -118,7 +118,9 @@ namespace MissionControl {
       PilotDef pilotDef = pathFinderVehicle.GetPilot().pilotDef;
       if (!pilotDef.DependenciesLoaded(1000u))
       {
+        Main.LogDebug("[PFM] Load dependencies for PilotDef");
         DataManager.Instance.RequestDependencies(pilotDef, LoadVehicleDefDependencies);
+        return;
       }
 
       LoadVehicleDefDependencies();
