@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<Version>1.3.0</Version>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net472</TargetFramework>
 		<AssemblySearchPaths>
 			$(AssemblySearchPaths);
 			$(ReferencePath);
