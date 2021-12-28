@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<Version>1.3.1</Version>
+		<Version>1.3.2</Version>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net472</TargetFramework>
 		<AssemblySearchPaths>
@@ -62,7 +63,6 @@
 
 		</Reference>
 		<Reference Include="Newtonsoft.Json">
-
 			<Private>True</Private>
 		</Reference>
 	</ItemGroup>
